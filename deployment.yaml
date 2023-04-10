@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kryptokrona-node
+  name: kryptokrona-node
+  namespace: kryptokrona
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kryptokrona-node
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: kryptokrona-node
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - kryptokrona-node
+              topologyKey: "kubernetes.io/hostname"
+      containers:
+        - image: jrkalf/kryptokrona-node:v1.1.1
+          env:
+            - name: NODE_ARGS
+              value: "--data-dir /kryptokrona/blockloc"
+          name: kryptokrona-node
+          command: ["/bin/sh"]
+          args: ["-c", "./kryptokronad --enable-cors=* --rpc-bind-ip=127.0.0.1 --rpc-bind-port=11898 $(NODE_ARGS)"]
+          resources:
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+            requests:
+              memory: "1Gi"
+              cpu: "1"
+          volumeMounts:
+            - name: node-db
+              mountPath: /kryptokrona/blockloc
+          ports:
+            - containerPort: 11898
+              name: "inbound-traffic"
+      volumes:
+        - name: node-db
+          persistentVolumeClaim:
+            claimName: kryptokrona-node

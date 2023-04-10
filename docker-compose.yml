@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  node1:
+    image: jrkalf/kryptokrona-node:v1.1.1
+    container_name: kryptokrona-node1
+    ports:
+      - "11898:11898"
+    volumes:
+      - ./blockloc:/kryptokrona/blockloc
+    command: >
+      /bin/sh -c " ./kryptokronad --enable-cors=* --rpc-bind-ip=127.0.0.1 --rpc-bind-port=11898 --data-dir /kryptokrona/blockloc --log-level 3 "
+    restart: always
