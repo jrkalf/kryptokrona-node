@@ -6,7 +6,7 @@ Kryptokrona (XKR) blockchain node packaged in a lightweight Docker image that yo
 
 ## Quick reference
 - **Maintained by**: [Jelle Kalf](https://github.com/jrkalf)
-- **Supported architectures**: `arm64v8`
+- **Supported architectures**: `arm64v8`, `amd64`
 - **Supported tags**: `latest`, `v1.1.1`
 
 # What is the difference to Kryptokrona's Docker build?
@@ -15,6 +15,7 @@ These Dockerfiles are trimmed down to the bare minimum of running the blockchain
 
 # How to use this image
 There are two ways of consuming the images:
+
 0. Prerequisits
 1. Kubernetes
 2. Docker Compose
