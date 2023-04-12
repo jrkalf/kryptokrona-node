@@ -5,9 +5,7 @@
 # //
 # // Please see the included LICENSE file for more information.
 
-# this docker file can be used for both a daemon, miner and a wallet if needed
-# we only have to set specific command or entrypoint inside the docker compose
-# file to customize the behavior of the container when started.
+# this docker file can be used for the blockchain node daemon.
 
 ARG ARCH=
 FROM ${ARCH}ubuntu:22.04 as build
@@ -79,14 +77,15 @@ RUN export DEBIAN_FRONTEND=noninteractive \
         libboost-serialization1.74.0 \
         libboost-program-options1.74.0 \
         libicu70 \
+    && apt-get clean -yqq \
+    && apt-get autoremove -yqq \
     && rm -rf /var/lib/apt/lists/*
 
 # create the directory for the daemon files
 RUN mkdir -p /kryptokrona/blockloc
 
-COPY --from=build /usr/src/kryptokrona/start.sh .
 COPY --from=build /usr/src/kryptokrona/build/src/kryptokronad .
-RUN chmod +x start.sh kryptokronad
+RUN chmod +x kryptokronad
 
 # --data-dir is binded to a volume - this volume is binded when starting the container
 # to start the container follow instructions on readme or in article published by marcus cvjeticanin on https://mjovanc.com
