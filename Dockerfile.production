@@ -11,11 +11,13 @@
 
 ARG ARCH=
 FROM ${ARCH}ubuntu:22.04 as build
+ARG VERSION
 
 # install build dependencies
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && apt-get install -y \
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt-get -yqq update \
+    && apt-get upgrade -yqq \
+    && apt-get install -yqq \
       build-essential \
       libssl-dev \
       libffi-dev \
@@ -39,6 +41,8 @@ RUN apt-get update \
 WORKDIR /usr/src
 RUN git clone https://github.com/kryptokrona/kryptokrona.git
 WORKDIR /usr/src/kryptokrona
+RUN export branch=$(echo ${VERSION} | sed -r 's/v//') \
+    && git checkout $(echo $branch)
 
 # create the build directory
 RUN mkdir build
@@ -54,14 +58,15 @@ FROM ${ARCH}ubuntu:22.04
 ENV PATH "$PATH:/kryptokrona"
 ENV NODE_ARGS ""
 
-# Exposing miner-to-node port
+# Exposing outside-to-node port
 EXPOSE 11898
 
 WORKDIR /kryptokrona
 
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && apt-get -y install \
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt-get -yqq update \
+    && apt-get upgrade -yqq \
+    && apt-get install -yqq \
         libffi8 \
         libssl3 \
         librocksdb6.11 \
