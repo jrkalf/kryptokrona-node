@@ -58,6 +58,7 @@ ENV NODE_ARGS ""
 
 # Exposing outside-to-node port
 EXPOSE 11898
+EXPOSE 11897
 
 WORKDIR /kryptokrona
 
@@ -79,14 +80,13 @@ RUN export DEBIAN_FRONTEND=noninteractive \
         libicu70 \
     && apt-get clean -yqq \
     && apt-get autoremove -yqq \
-    && rm -rf /var/lib/apt/lists/*
-
-# create the directory for the daemon files
-RUN mkdir -p /kryptokrona/blockloc
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /kryptokrona/blockloc
 
 COPY --from=build /usr/src/kryptokrona/build/src/kryptokronad .
 RUN chmod +x kryptokronad
 
 # --data-dir is binded to a volume - this volume is binded when starting the container
 # to start the container follow instructions on readme or in article published by marcus cvjeticanin on https://mjovanc.com
+# The --data-dir should be inputted via the NODE_ARGS variable
 CMD [ "/bin/sh", "-c", "./kryptokronad --enable-cors=* --rpc-bind-ip=127.0.0.1 --rpc-bind-port=11898 ${NODE_ARGS}" ]

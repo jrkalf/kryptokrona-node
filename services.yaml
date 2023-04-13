@@ -9,5 +9,8 @@ spec:
   ports:
     - port: 11898
       targetPort: 11898
+      name: "exposed-port"
+    - port: 11897
+      targetPort: 11897
       name: "inbound-to-node"
   type: LoadBalancer
