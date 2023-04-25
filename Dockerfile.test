@@ -1,0 +1,84 @@
+# // Copyright (c) 2012-2017, The CryptoNote developers, The Bytecoin developers
+# // Copyright (c) 2014-2018, The Monero Project
+# // Copyright (c) 2018-2019, The TurtleCoin Developers
+# // Copyright (c) 2019, The Kryptokrona Developers
+# //
+# // Please see the included LICENSE file for more information.
+
+# this docker file can be used for both a daemon, miner and a wallet if needed
+# we only have to set specific command or entrypoint inside the docker compose
+# file to customize the behavior of the container when started.
+
+ARG ARCH=
+FROM ${ARCH}ubuntu:22.04 as build
+
+# install build dependencies
+RUN apt-get update \
+    && apt-get update -y \
+    && apt-get install -y \
+        build-essential \
+        libssl-dev \
+        libffi-dev \
+        python3-dev \
+        gcc-11 \
+        g++-11 \
+        git \
+        cmake \
+        librocksdb-dev \
+        libboost-all-dev \
+        libboost-system1.74.0 \
+        libboost-filesystem1.74.0 \
+        libboost-thread1.74.0 \
+        libboost-date-time1.74.0 \
+        libboost-chrono1.74.0 \
+        libboost-regex1.74.0 \
+        libboost-serialization1.74.0 \
+        libboost-program-options1.74.0 \
+        libicu70 \
+        cron \
+        rpcbind
+
+WORKDIR /usr/src
+RUN git clone https://github.com/kryptokrona/kryptokrona.git
+WORKDIR /usr/src/kryptokrona
+RUN chmod +x ./wait-for-it.sh ./docker-entrypoint.sh
+
+# create the build directory
+RUN mkdir build
+WORKDIR /usr/src/kryptokrona/build
+
+# build and install
+RUN cmake -DTEST_NET=ON .. && make -j$(nproc)
+###
+
+FROM ${ARCH}ubuntu:22.04
+ENV PATH "$PATH:/kryptokrona"
+WORKDIR /kryptokrona
+RUN apt-get update \
+    && apt-get -y update \
+    && apt-get -y install \
+        libffi8 \
+        libssl3 \
+        librocksdb6.11 \
+        libboost-system1.74.0 \
+        libboost-filesystem1.74.0 \
+        libboost-thread1.74.0 \
+        libboost-date-time1.74.0 \
+        libboost-chrono1.74.0 \
+        libboost-regex1.74.0 \
+        libboost-serialization1.74.0 \
+        libboost-program-options1.74.0 \
+        libicu70 \
+        cron \
+        rpcbind \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /kryptokrona/blockloc \
+    && chmod +x ./wait-for-it.sh ./docker-entrypoint.sh
+
+COPY --from=build /usr/src/kryptokrona/wait-for-it.sh .
+COPY --from=build /usr/src/kryptokrona/docker-entrypoint.sh .
+COPY --from=build /usr/src/kryptokrona/build/src/kryptokronad .
+COPY --from=build /usr/src/kryptokrona/build/src/miner .
+COPY --from=build /usr/src/kryptokrona/build/src/wallet-api .
+COPY --from=build /usr/src/kryptokrona/build/src/xkrwallet .
+COPY --from=build /usr/src/kryptokrona/build/src/xkrwallet-beta .
