@@ -27,7 +27,7 @@ spec:
                       - kryptokrona-node
               topologyKey: "kubernetes.io/hostname"
       containers:
-        - image: jrkalf/kryptokrona-node:v1.1.1
+        - image: jrkalf/kryptokrona-node:latest
           env:
             - name: NODE_ARGS
               value: "--data-dir /kryptokrona/blockloc"
@@ -47,6 +47,7 @@ spec:
           ports:
             - containerPort: 11898
               name: "inbound-traffic"
+          terminationGracePeriodSeconds: 300
       volumes:
         - name: node-db
           persistentVolumeClaim:

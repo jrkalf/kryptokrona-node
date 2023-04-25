@@ -3,15 +3,12 @@ name: Docker Image CI
 on:
   push:
     branches:
-      - 'main'
       - 'dev'
       - 'v*.*.*'
     tags:
       - 'v*.*.*'
   pull_request:
     branches: 
-      - 'main'
-      - 'dev'
       - 'v*.*.*'
 
 jobs:
@@ -60,3 +57,5 @@ jobs:
             ${{ steps.meta.outputs.tags }}
             ${{ github.repository }}:latest
           labels: ${{ steps.meta.outputs.labels }}
+        rules:
+          if: github.ref != 'refs/heads/main'
