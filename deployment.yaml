@@ -27,26 +27,23 @@ spec:
                       - kryptokrona-node
               topologyKey: "kubernetes.io/hostname"
       containers:
-        - image: jrkalf/kryptokrona-node:v1.1.1
+        - image: jrkalf/kryptokrona-node:latest
           env:
             - name: NODE_ARGS
               value: "--data-dir /kryptokrona/blockloc"
           name: kryptokrona-node
           command: ["/bin/sh"]
           args: ["-c", "./kryptokronad --enable-cors=* --rpc-bind-ip=127.0.0.1 --rpc-bind-port=11898 $(NODE_ARGS)"]
-          resources:
-            limits:
-              memory: "2Gi"
-              cpu: "1"
-            requests:
-              memory: "1Gi"
-              cpu: "1"
+          resources: {}
           volumeMounts:
             - name: node-db
               mountPath: /kryptokrona/blockloc
           ports:
+            - containerPort: 11897
+              name: "inbound-traffic1"
             - containerPort: 11898
-              name: "inbound-traffic"
+              name: "inbound-traffic2"
+          terminationGracePeriodSeconds: 300
       volumes:
         - name: node-db
           persistentVolumeClaim:
