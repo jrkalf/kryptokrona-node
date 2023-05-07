@@ -5,17 +5,17 @@
 # //
 # // Please see the included LICENSE file for more information.
 
-# this docker file can be used for both a daemon, miner and a wallet if needed
-# we only have to set specific command or entrypoint inside the docker compose
-# file to customize the behavior of the container when started.
+# this docker file can be used for the blockchain node daemon.
 
 ARG ARCH=
 FROM ${ARCH}ubuntu:22.04 as build
+ARG VERSION=1.1.2
 
 # install build dependencies
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && apt-get install -y \
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt-get -yqq update \
+    && apt-get upgrade -yqq \
+    && apt-get install -yqq \
       build-essential \
       libssl-dev \
       libffi-dev \
@@ -39,6 +39,7 @@ RUN apt-get update \
 WORKDIR /usr/src
 RUN git clone https://github.com/kryptokrona/kryptokrona.git
 WORKDIR /usr/src/kryptokrona
+RUN git checkout ${VERSION}
 
 # create the build directory
 RUN mkdir build
@@ -54,14 +55,16 @@ FROM ${ARCH}ubuntu:22.04
 ENV PATH "$PATH:/kryptokrona"
 ENV NODE_ARGS ""
 
-# Exposing miner-to-node port
+# Exposing outside-to-node port
 EXPOSE 11898
+EXPOSE 11897
 
 WORKDIR /kryptokrona
 
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && apt-get -y install \
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt-get -yqq update \
+    && apt-get upgrade -yqq \
+    && apt-get install -yqq \
         libffi8 \
         libssl3 \
         librocksdb6.11 \
@@ -74,15 +77,15 @@ RUN apt-get update \
         libboost-serialization1.74.0 \
         libboost-program-options1.74.0 \
         libicu70 \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean -yqq \
+    && apt-get autoremove -yqq \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /kryptokrona/blockloc
 
-# create the directory for the daemon files
-RUN mkdir -p /kryptokrona/blockloc
-
-COPY --from=build /usr/src/kryptokrona/start.sh .
 COPY --from=build /usr/src/kryptokrona/build/src/kryptokronad .
-RUN chmod +x start.sh kryptokronad
+RUN chmod +x kryptokronad
 
 # --data-dir is binded to a volume - this volume is binded when starting the container
 # to start the container follow instructions on readme or in article published by marcus cvjeticanin on https://mjovanc.com
+# The --data-dir should be inputted via the NODE_ARGS variable
 CMD [ "/bin/sh", "-c", "./kryptokronad --enable-cors=* --rpc-bind-ip=127.0.0.1 --rpc-bind-port=11898 ${NODE_ARGS}" ]
