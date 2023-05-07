@@ -2,10 +2,11 @@ version: '3.8'
 
 services:
   node1:
-    image: jrkalf/kryptokrona-node:v1.1.1
+    image: jrkalf/kryptokrona-node:latest
     container_name: kryptokrona-node1
     ports:
       - "11898:11898"
+      - "11897:11897"
     volumes:
       - ./blockloc:/kryptokrona/blockloc
     command: >
