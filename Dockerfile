@@ -9,7 +9,7 @@
 
 ARG ARCH=
 FROM ${ARCH}ubuntu:22.04 as build
-ARG VERSION=1.1.2
+ARG VERSION=v1.1.3
 
 # install build dependencies
 RUN export DEBIAN_FRONTEND=noninteractive \
