@@ -8,8 +8,8 @@
 # this docker file can be used for the blockchain node daemon.
 
 ARG ARCH=
-FROM ${ARCH}ubuntu:22.04 as build
-ARG VERSION=v1.1.5
+FROM ${ARCH}ubuntu:22.04 AS build
+ARG VERSION=v.1.1.7
 
 # install build dependencies
 RUN export DEBIAN_FRONTEND=noninteractive \
